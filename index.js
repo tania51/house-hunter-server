@@ -31,31 +31,31 @@ async function run() {
     const houseCollection = client.db('houseHunter').collection('added-houses')
 
     // jwt api
-    // app.post('/jwt', async(req, res) => {
-    //   const query = req.body;
-    //   const token = jwt.sign(query, process.env.ACCESS_SECRET_TOKEN, {expiresIn: '1hr'})
-    //   res.send( {token} )
-    // })
+    app.post('/jwt', async(req, res) => {
+      const query = req.body;
+      const token = jwt.sign(query, process.env.ACCESS_SECRET_TOKEN, {expiresIn: '1hr'})
+      res.send( {token} )
+    })
 
-    // middlewares
-    // const verifyToken = (req, res, next) => {
-    //   if(!req.headers.authorization) {
-    //     return res.status(401).send({message: 'unauthorized access'})
-    //   }
-    //   const token = req.headers.authorization.split(' ')[1];
-    //   jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (err, decoded) => {
-    //     if(err) {
-    //       return res.status(401).send({message: 'unauthorized access'})
-    //     }
-    //     req.decoded = decoded;
-    //     next();
-    //   })
-    //   // next();
-    // }
+    middlewares
+    const verifyToken = (req, res, next) => {
+      if(!req.headers.authorization) {
+        return res.status(401).send({message: 'unauthorized access'})
+      }
+      const token = req.headers.authorization.split(' ')[1];
+      jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (err, decoded) => {
+        if(err) {
+          return res.status(401).send({message: 'unauthorized access'})
+        }
+        req.decoded = decoded;
+        next();
+      })
+      // next();
+    }
 
 
     // create user using post method
-    app.post('/users', async(req, res) => {
+    app.post('/users', verifyToken, async(req, res) => {
       const query = req.body;
       const result = await userCollection.insertOne(query);
       res.send(result)
